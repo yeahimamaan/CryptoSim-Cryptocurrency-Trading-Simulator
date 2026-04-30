@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <map>
 using namespace std;
 
 class Coin
@@ -19,6 +20,11 @@ public:
         cout << "Symbol: " << symbol << endl;
         cout << "Price: $" << price << endl;
     }
+
+    // Adding getters to access private members
+    string getName() const { return name; }
+    string getSymbol() const { return symbol; }
+    double getPrice() const { return price; }
 };
 
 class Transaction
@@ -41,6 +47,12 @@ public:
         cout << "Price at Time: $" << priceAtTime << endl;
         cout << "Timestamp: " << timestamp << endl;
     }
+
+    string getType() const { return type; }
+    string getCoinName() const { return CoinName; }
+    double getQuantity() const { return quantity; }
+    double getPriceAtTime() const { return priceAtTime; }
+    string getTimestamp() const { return timestamp; }
 };
 
 class Wallet
@@ -66,5 +78,17 @@ public:
         coins.push_back(Coin("Doge", "DOGE", 0.25));
         coins.push_back(Coin("Cardano", "ADA", 2.0));
         coins.push_back(Coin("Zcoin", "ZEE", 45000));
+        coins.push_back(Coin("ABCoin", "AB", 45000));
     }
+};
+
+class User
+{
+private:
+    string username;
+    Wallet wallet;
+    vector<Transaction> transactionHistory;
+
+public:
+    User(string name, double initialBalance) : username(name), wallet(initialBalance) {}
 };
