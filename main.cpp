@@ -1,4 +1,6 @@
 #include <iostream>
+#include <string>
+#include <vector>
 using namespace std;
 
 class Coin
@@ -38,5 +40,31 @@ public:
         cout << "Quantity: " << quantity << endl;
         cout << "Price at Time: $" << priceAtTime << endl;
         cout << "Timestamp: " << timestamp << endl;
+    }
+};
+
+class Wallet
+{
+private:
+    double usdtBalance;
+    map<string, double> holdings; // Coin name and quantity
+
+public:
+    Wallet(double balance) : usdtBalance(balance) {}
+};
+
+class Market
+{
+private:
+    vector<Coin> coins;
+
+public:
+    Market()
+    {
+        coins.push_back(Coin("Bitcoin", "BTC", 50000.0));
+        coins.push_back(Coin("Ethereum", "ETH", 4000.0));
+        coins.push_back(Coin("Doge", "DOGE", 0.25));
+        coins.push_back(Coin("Cardano", "ADA", 2.0));
+        coins.push_back(Coin("Zcoin", "ZEE", 45000));
     }
 };
