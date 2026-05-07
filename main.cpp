@@ -385,3 +385,95 @@ public:
         cout << "3. Exit Admin Panel" << endl;
     }
 };
+class Exchange
+{
+private:
+    Market market;
+    User user;
+    Admin admin;
+
+public:
+    Exchange() : user("user", "123", 100000), admin("admin", "admin", "999") {}
+
+    void start()
+    {
+        int choice;
+        do
+        {
+            cout << "\n=== Crypto Exchange ===" << endl;
+            cout << "1. View Market" << endl;
+            cout << "2. Buy Coin" << endl;
+            cout << "3. Sell Coin" << endl;
+            cout << "4. View Wallet" << endl;
+            cout << "5. View Portfolio" << endl;
+            cout << "6. View Transactions" << endl;
+            cout << "7. Admin Panel" << endl;
+            cout << "0. Exit" << endl;
+            cin >> choice;
+
+            if (choice == 1)
+                market.displayMarket();
+
+            else if (choice == 2)
+            {
+                string sym; double qty;
+                cout << "Enter Symbol and Quantity: ";
+                cin >> sym >> qty;
+                user.buy(market, sym, qty);
+            }
+
+            else if (choice == 3)
+            {
+                string sym; double qty;
+                cout << "Enter Symbol and Quantity: ";
+                cin >> sym >> qty;
+                user.sell(market, sym, qty);
+            }
+
+            else if (choice == 4)
+                user.viewWallet();
+
+            else if (choice == 5)
+                user.viewPortfolio(market);
+
+            else if (choice == 6)
+                user.viewHistory();
+
+            else if (choice == 7)
+                adminMenu();
+        } while (choice != 0);
+    }
+
+    void adminMenu()
+    {
+        int choice;
+        do
+        {
+            admin.displayAdminMenu();
+            cin >> choice;
+
+            if (choice == 1)
+            {
+                string name, symbol;
+                double price;
+                cout << "Enter name symbol price: ";
+                cin >> name >> symbol >> price;
+                admin.addCoin(market, name, symbol, price);
+            }
+            else if (choice == 2)
+            {
+                string symbol; double price;
+                cout << "Enter symbol and new price: ";
+                cin >> symbol >> price;
+                admin.updatePrice(market, symbol, price);
+            }
+
+        } while (choice != 3);
+    }
+};
+int main()
+{
+    Exchange ex;   
+    ex.start();    
+    return 0;
+}
