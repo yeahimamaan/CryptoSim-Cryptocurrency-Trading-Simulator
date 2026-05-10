@@ -145,6 +145,7 @@ class Market
 {
 private:
     vector<Coin> coins;
+    map<string, PriceHistory> histories;
 
 public:
     Market()
@@ -155,6 +156,32 @@ public:
         coins.push_back(Coin("Cardano", "ADA", 2.0));
         coins.push_back(Coin("Zcoin", "ZEE", 45000.0));
         coins.push_back(Coin("ABCoin", "AB", 45000.0));
+
+        PriceHistory btc("BTC");
+        btc.addPrice(2020, 29000); btc.addPrice(2021, 47000);
+        btc.addPrice(2022, 16500); btc.addPrice(2023, 42000); btc.addPrice(2024, 93000);
+        histories.insert({"BTC", btc});
+
+        PriceHistory eth("ETH");
+        eth.addPrice(2020, 730);  eth.addPrice(2021, 3700);
+        eth.addPrice(2022, 1200); eth.addPrice(2023, 2280); eth.addPrice(2024, 3400);
+        histories.insert({"ETH", eth});
+
+        PriceHistory doge("DOGE");
+        doge.addPrice(2020, 0.004); doge.addPrice(2021, 0.17);
+        doge.addPrice(2022, 0.07);  doge.addPrice(2023, 0.09); doge.addPrice(2024, 0.38);
+        histories.insert({"DOGE", doge});
+
+        PriceHistory ada("ADA");
+        ada.addPrice(2020, 0.18); ada.addPrice(2021, 1.30);
+        ada.addPrice(2022, 0.26); ada.addPrice(2023, 0.60); ada.addPrice(2024, 0.90);
+        histories.insert({"ADA", ada});
+    }
+
+    void viewHistory(string symbol) {
+        auto it = histories.find(symbol);
+        if (it == histories.end()) { cout << "No history for " << symbol << endl; return; }
+        it->second.displayHistory();
     }
 
     void displayMarket()
@@ -231,50 +258,41 @@ public:
     }
 };
 
-class PriceHistory
-{
+class PriceHistory {
 private:
     string coinSymbol;
-    vector<double> prices;
+    vector<pair<int, double>> prices;
 
 public:
     PriceHistory(string symbol) : coinSymbol(symbol) {}
 
-    void addPrice(double price)
-    {
-        prices.push_back(price);
+    void addPrice(int year, double price) {
+        prices.push_back({year, price});
     }
 
-    void displayHistory()
-    {
+    void displayHistory() {
+        if (prices.empty()) { cout << "No history available." << endl; return; }
         cout << "=== Price History for " << coinSymbol << " ===" << endl;
-        for (int i = 0; i < prices.size(); i++)
-        {
-            cout << "Entry " << i + 1 << ": $" << prices[i] << endl;
-        }
+        for (auto& p : prices)
+            cout << p.first << ": $" << p.second << endl;
+        cout << "Highest: $" << getHighest() << endl;
+        cout << "Lowest:  $" << getLowest() << endl;
     }
 
-    double getHighest()
-    {
-        double highest = prices[0];
-        for (int i = 1; i < prices.size(); i++)
-        {
-            if (prices[i] > highest)
-                highest = prices[i];
-        }
-        return highest;
+    double getHighest() {
+        double h = prices[0].second;
+        for (auto& p : prices) if (p.second > h) h = p.second;
+        return h;
     }
 
-    double getLowest()
-    {
-        double lowest = prices[0];
-        for (int i = 1; i < prices.size(); i++)
-        {
-            if (prices[i] < lowest)
-                lowest = prices[i];
-        }
-        return lowest;
+    double getLowest() {
+        double l = prices[0].second;
+        for (auto& p : prices) if (p.second < l) l = p.second;
+        return l;
     }
+
+    string getSymbol() const { return coinSymbol; }
+    vector<pair<int, double>> getData() const { return prices; }
 };
 
 class Account
@@ -385,6 +403,7 @@ public:
         cout << "3. Exit Admin Panel" << endl;
     }
 };
+
 class Exchange
 {
 private:
@@ -408,6 +427,7 @@ public:
             cout << "5. View Portfolio" << endl;
             cout << "6. View Transactions" << endl;
             cout << "7. Admin Panel" << endl;
+            cout << "8. View Price History" << endl;
             cout << "0. Exit" << endl;
             cin >> choice;
 
@@ -441,6 +461,15 @@ public:
 
             else if (choice == 7)
                 adminMenu();
+
+            else if (choice == 8)
+            {
+                string sym;
+                cout << "Enter coin symbol (BTC, ETH, DOGE, ADA): ";
+                cin >> sym;
+                market.viewHistory(sym);
+            }    
+        
         } while (choice != 0);
     }
 
@@ -471,6 +500,7 @@ public:
         } while (choice != 3);
     }
 };
+
 int main()
 {
     Exchange ex;   
