@@ -176,6 +176,16 @@ public:
         ada.addPrice(2020, 0.18); ada.addPrice(2021, 1.30);
         ada.addPrice(2022, 0.26); ada.addPrice(2023, 0.60); ada.addPrice(2024, 0.90);
         histories.insert({"ADA", ada});
+
+        PriceHistory zee("ZEE");
+        zee.addPrice(2020, 12000); zee.addPrice(2021, 38000);
+        zee.addPrice(2022, 21000); zee.addPrice(2023, 31000); zee.addPrice(2024, 45000);
+        histories.insert({"ZEE", zee});
+
+        PriceHistory ab("AB");
+        ab.addPrice(2020, 8000);  ab.addPrice(2021, 29000);
+        ab.addPrice(2022, 15000); ab.addPrice(2023, 38000); ab.addPrice(2024, 45000);
+        histories.insert({"AB", ab});
     }
 
     void viewHistory(string symbol) {
