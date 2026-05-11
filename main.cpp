@@ -51,7 +51,7 @@ public:
         cout << "Timestamp: " << timestamp << endl;
     }
 
-    // File handling - save transaction to file
+    // File handling to save transaction histor to file
     void saveToFile(string filename)
     {
         ofstream file(filename, ios::app);
@@ -60,7 +60,7 @@ public:
         file.close();
     }
 
-    // File handling - load and display all transactions from file
+    // File handling loads and displays all transactions history from file
     static void loadFromFile(string filename)
     {
         ifstream file(filename);
