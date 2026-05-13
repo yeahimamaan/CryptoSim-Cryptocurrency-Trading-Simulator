@@ -3,227 +3,28 @@
 #include <vector>
 #include <map>
 #include <fstream>
+
+// Header files
+#include "Coin.h"
+#include "PriceHistory.h"
+#include "Transaction.h"
+#include "Wallet.h"
+#include "Account.h"
+
 using namespace std;
 
 // =====================
-// COIN CLASS
-// =====================
-class Coin
-{
-private:
-    string name;
-    string symbol;
-    double price;
-
-public:
-    Coin() : name(""), symbol(""), price(0.0) {}
-    Coin(string n, string s, double p) : name(n), symbol(s), price(p) {}
-
-    void displayInfo()
-    {
-        cout << "Name: " << name << endl;
-        cout << "Symbol: " << symbol << endl;
-        cout << "Price: $" << price << endl;
-    }
-
-    string getName() const { return name; }
-    string getSymbol() const { return symbol; }
-    double getPrice() const { return price; }
-    void setPrice(double p) { price = p; }
-};
-
-// =====================
-// PRICE HISTORY CLASS
-// Moved above Market because Market depends on it
-// =====================
-class PriceHistory
-{
-private:
-    string coinSymbol;
-    vector<pair<int, double>> prices; // year, price
-
-public:
-    PriceHistory() : coinSymbol("") {}
-    PriceHistory(string symbol) : coinSymbol(symbol) {}
-
-    void addPrice(int year, double price)
-    {
-        prices.push_back({year, price});
-    }
-
-    void displayHistory()
-    {
-        if (prices.empty())
-        {
-            cout << "No history available." << endl;
-            return;
-        }
-        cout << "=== Price History for " << coinSymbol << " ===" << endl;
-        for (auto &p : prices)
-            cout << p.first << ": $" << p.second << endl;
-        cout << "Highest: $" << getHighest() << endl;
-        cout << "Lowest:  $" << getLowest() << endl;
-    }
-
-    double getHighest()
-    {
-        double h = prices[0].second;
-        for (auto &p : prices)
-            if (p.second > h)
-                h = p.second;
-        return h;
-    }
-
-    double getLowest()
-    {
-        double l = prices[0].second;
-        for (auto &p : prices)
-            if (p.second < l)
-                l = p.second;
-        return l;
-    }
-
-    string getSymbol() const { return coinSymbol; }
-};
-
-// =====================
-// TRANSACTION CLASS
-// Handles saving and loading transaction history per user
-// =====================
-class Transaction
-{
-private:
-    string type;
-    string coinName;
-    double quantity;
-    double priceAtTime;
-    string timestamp;
-
-public:
-    Transaction(string t, string c, double q, double p, string ts)
-        : type(t), coinName(c), quantity(q), priceAtTime(p), timestamp(ts) {}
-
-    void displayTransaction()
-    {
-        cout << "Type: " << type << endl;
-        cout << "Coin: " << coinName << endl;
-        cout << "Quantity: " << quantity << endl;
-        cout << "Price at Time: $" << priceAtTime << endl;
-        cout << "Timestamp: " << timestamp << endl;
-    }
-
-    // Saves transaction to a file named after the user
-    void saveToFile(string filename)
-    {
-        ofstream file(filename, ios::app);
-        file << type << "," << coinName << "," << quantity << ","
-             << priceAtTime << "," << timestamp << endl;
-        file.close();
-    }
-
-    // Loads and displays all transactions from the users file
-    static void loadFromFile(string filename)
-    {
-        ifstream file(filename);
-        if (!file)
-        {
-            cout << "No transaction history found." << endl;
-            return;
-        }
-        string line;
-        cout << "=== Transaction History ===" << endl;
-        while (getline(file, line))
-        {
-            cout << line << endl;
-        }
-        file.close();
-    }
-
-    string getType() const { return type; }
-    string getCoinName() const { return coinName; }
-    double getQuantity() const { return quantity; }
-    double getPriceAtTime() const { return priceAtTime; }
-    string getTimestamp() const { return timestamp; }
-};
-
-// =====================
-// WALLET CLASS
-// =====================
-class Wallet
-{
-private:
-    double usdtBalance;
-    map<string, double> holdings; // symbol -> quantity
-
-public:
-    Wallet() : usdtBalance(0.0) {}
-    Wallet(double balance) : usdtBalance(balance) {}
-
-    void deposit(double amount)
-    {
-        usdtBalance += amount;
-    }
-
-    bool withdraw(double amount)
-    {
-        if (amount > usdtBalance)
-        {
-            cout << "Insufficient balance!" << endl;
-            return false;
-        }
-        usdtBalance -= amount;
-        return true;
-    }
-
-    void addCoin(string symbol, double qty)
-    {
-        holdings[symbol] += qty;
-    }
-
-    bool removeCoin(string symbol, double qty)
-    {
-        if (holdings[symbol] < qty)
-        {
-            cout << "Insufficient coins!" << endl;
-            return false;
-        }
-        holdings[symbol] -= qty;
-        return true;
-    }
-
-    void displayWallet()
-    {
-        cout << "=== Wallet ===" << endl;
-        cout << "USD Balance: $" << usdtBalance << endl;
-        cout << "Holdings:" << endl;
-        if (holdings.empty())
-        {
-            cout << "No coins owned yet." << endl;
-        }
-        for (auto &h : holdings)
-        {
-            cout << h.first << ": " << h.second << " coins" << endl;
-        }
-    }
-
-    double getBalance() const { return usdtBalance; }
-    map<string, double> getHoldings() const { return holdings; }
-};
-
-// =====================
 // MARKET CLASS
-// Stores all coins and their price histories
 // =====================
 class Market
 {
 private:
     vector<Coin> coins;
-    map<string, PriceHistory> histories; // symbol -> price history
+    map<string, PriceHistory> histories;
 
 public:
     Market()
     {
-        // Initialize coins
         coins.push_back(Coin("Bitcoin", "BTC", 50000.0));
         coins.push_back(Coin("Ethereum", "ETH", 4000.0));
         coins.push_back(Coin("Doge", "DOGE", 0.25));
@@ -231,7 +32,6 @@ public:
         coins.push_back(Coin("Zcoin", "ZEE", 45000.0));
         coins.push_back(Coin("ABCoin", "AB", 45000.0));
 
-        // Initialize price histories for each coin
         PriceHistory btc("BTC");
         btc.addPrice(2020, 29000);
         btc.addPrice(2021, 47000);
@@ -292,7 +92,6 @@ public:
         }
     }
 
-    // Returns pointer to coin by symbol, nullptr if not found
     Coin *getCoin(string symbol)
     {
         for (int i = 0; i < coins.size(); i++)
@@ -303,10 +102,7 @@ public:
         return nullptr;
     }
 
-    void addCoin(Coin c)
-    {
-        coins.push_back(c);
-    }
+    void addCoin(Coin c) { coins.push_back(c); }
 
     void updateCoinPrice(string symbol, double newPrice)
     {
@@ -334,7 +130,6 @@ public:
 
 // =====================
 // PORTFOLIO CLASS
-// Shows total value of all holdings at current prices
 // =====================
 class Portfolio
 {
@@ -345,10 +140,7 @@ private:
 public:
     Portfolio() : totalValue(0) {}
 
-    void updateHoldings(map<string, double> h)
-    {
-        holdings = h;
-    }
+    void updateHoldings(map<string, double> h) { holdings = h; }
 
     void displayPortfolio(Market &market)
     {
@@ -375,31 +167,8 @@ public:
 };
 
 // =====================
-// ACCOUNT CLASS (Base class for User and Admin)
-// =====================
-class Account
-{
-protected:
-    string username;
-    string password;
-
-public:
-    Account() : username(""), password("") {}
-    Account(string u, string p) : username(u), password(p) {}
-
-    // Returns true if credentials match
-    bool login(string u, string p)
-    {
-        return (username == u && password == p);
-    }
-
-    string getUsername() const { return username; }
-};
-
-// =====================
 // USER CLASS
 // Inherits from Account
-// Each user has their own wallet, portfolio and transaction file
 // =====================
 class User : public Account
 {
@@ -415,7 +184,6 @@ public:
     User(string u, string p, double balance)
         : Account(u, p), wallet(balance)
     {
-        // Transaction file is named after the user
         transactionFile = u + "_transactions.txt";
     }
 
@@ -431,7 +199,6 @@ public:
         if (wallet.withdraw(totalCost))
         {
             wallet.addCoin(symbol, qty);
-            // Save transaction to this users own file
             Transaction t("BUY", symbol, qty, coin->getPrice(), "2025-01-01");
             t.saveToFile(transactionFile);
             transactionHistory.push_back(t);
@@ -451,7 +218,6 @@ public:
         {
             double totalValue = coin->getPrice() * qty;
             wallet.deposit(totalValue);
-            // Save transaction to this users own file
             Transaction t("SELL", symbol, qty, coin->getPrice(), "2025-01-01");
             t.saveToFile(transactionFile);
             transactionHistory.push_back(t);
@@ -459,10 +225,7 @@ public:
         }
     }
 
-    void viewWallet()
-    {
-        wallet.displayWallet();
-    }
+    void viewWallet() { wallet.displayWallet(); }
 
     void viewPortfolio(Market &market)
     {
@@ -470,17 +233,12 @@ public:
         portfolio.displayPortfolio(market);
     }
 
-    // Loads transaction history from this users own file
-    void viewHistory()
-    {
-        Transaction::loadFromFile(transactionFile);
-    }
+    void viewHistory() { Transaction::loadFromFile(transactionFile); }
 };
 
 // =====================
 // ADMIN CLASS
 // Inherits from Account
-// Can add coins and update prices
 // =====================
 class Admin : public Account
 {
@@ -514,7 +272,6 @@ public:
 
 // =====================
 // TRADE MANAGER CLASS
-// Handles and displays all trades across the system
 // =====================
 class TradeManager
 {
@@ -531,7 +288,6 @@ public:
         totalTrades++;
         totalBuys++;
     }
-
     void recordSell()
     {
         totalTrades++;
@@ -549,8 +305,6 @@ public:
 
 // =====================
 // EXCHANGE CLASS
-// Main controller - manages all users, admin, market
-// Handles registration, login and menus
 // =====================
 class Exchange
 {
@@ -558,13 +312,11 @@ private:
     Market market;
     Admin admin;
     TradeManager tradeManager;
-    vector<User> users; // stores all registered users
+    vector<User> users;
 
 public:
-    // Admin credentials are set here
     Exchange() : admin("admin", "admin123", "admincode") {}
 
-    // Register a new user profile
     void registerUser()
     {
         string username, password;
@@ -573,7 +325,6 @@ public:
         cout << "Enter username: ";
         cin >> username;
 
-        // Check if username already exists
         for (int i = 0; i < users.size(); i++)
         {
             if (users[i].getUsername() == username)
@@ -589,10 +340,9 @@ public:
         cin >> balance;
 
         users.push_back(User(username, password, balance));
-        cout << "Account created successfully! Welcome, " << username << "!" << endl;
+        cout << "Account created! Welcome, " << username << "!" << endl;
     }
 
-    // Login as existing user and show their menu
     void loginUser()
     {
         if (users.empty())
@@ -608,7 +358,6 @@ public:
         cout << "Enter password: ";
         cin >> password;
 
-        // Search for matching user
         int foundIndex = -1;
         for (int i = 0; i < users.size(); i++)
         {
@@ -627,7 +376,6 @@ public:
 
         cout << "\nWelcome back, " << users[foundIndex].getUsername() << "!" << endl;
 
-        // User menu loop
         int choice;
         do
         {
@@ -685,7 +433,7 @@ public:
             else if (choice == 7)
             {
                 string sym;
-                cout << "Enter coin symbol (BTC, ETH, DOGE, ADA, ZEE, AB): ";
+                cout << "Enter coin symbol (BTC/ETH/DOGE/ADA/ZEE/AB): ";
                 cin >> sym;
                 market.viewHistory(sym);
             }
@@ -700,7 +448,6 @@ public:
         } while (choice != 8);
     }
 
-    // Login as admin with password protection
     void loginAdmin()
     {
         string username, password;
@@ -710,7 +457,6 @@ public:
         cout << "Enter admin password: ";
         cin >> password;
 
-        // Verify admin credentials
         if (!admin.login(username, password))
         {
             cout << "Invalid admin credentials!" << endl;
@@ -758,7 +504,6 @@ public:
         } while (choice != 3);
     }
 
-    // Main menu of the application
     void start()
     {
         int choice;
@@ -774,29 +519,18 @@ public:
             cin >> choice;
 
             if (choice == 1)
-            {
                 registerUser();
-            }
             else if (choice == 2)
-            {
                 loginUser();
-            }
             else if (choice == 3)
-            {
                 loginAdmin();
-            }
             else if (choice == 4)
-            {
                 tradeManager.displayStats();
-            }
             else if (choice == 5)
-            {
                 cout << "Thank you for using CryptoSim. Goodbye!" << endl;
-            }
             else
-            {
                 cout << "Invalid choice!" << endl;
-            }
+
         } while (choice != 5);
     }
 };
